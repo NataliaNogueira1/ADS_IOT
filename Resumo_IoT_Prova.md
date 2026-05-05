@@ -185,3 +185,119 @@ O 5G tem tres modos:
 - Une TI e OT na mesma rede
 
 ---
+
+---
+
+## 8. Simuladores de Rede
+| Simulador | Foco | Quando usar |
+|---|---|---|
+| **Cooja** | Contiki OS, sensores com recursos limitados | Simular nos reais com Contiki |
+| **NS-3** | Matematico, altissima escala | Pesquisa academica, grandes redes |
+| **TOSSIM** | TinyOS | Simular comportamento de motes TinyOS |
+| **Wokwi** | Arduino/ESP32 no browser | Prototipagem rapida sem hardware fisico |
+
+> Uso: validar infraestruturas sem gastos fisicos antes do deploy real.
+
+---
+
+## 8. Simuladores de Rede
+| Simulador | Foco | Quando usar |
+|---|---|---|
+| **Cooja** | Contiki OS, sensores com recursos limitados | Simular nos reais com Contiki |
+| **NS-3** | Matematico, altissima escala | Pesquisa academica, grandes redes |
+| **TOSSIM** | TinyOS | Simular comportamento de motes TinyOS |
+| **Wokwi** | Arduino/ESP32 no browser | Prototipagem rapida sem hardware fisico |
+
+> Uso: validar infraestruturas sem gastos fisicos antes do deploy real.
+
+---
+
+## 9. Stack MING
+
+MING = Mosquitto + InfluxDB + Node-RED + Grafana
+
+- Tira a dependencia do dispositivo com a aplicacao
+- Serve para nao sobrecarregar o back-end
+- Broker NAO processa — Node-RED faz isso
+- CLP pode se comunicar diretamente com Node-RED
+- Stack MING: cuida do IoT | Stack Web: vai para a internet
+
+| Letra | Componente | Funcao |
+|---|---|---|
+| M | Mosquitto | Broker MQTT — recebe telemetria, NAO processa |
+| I | InfluxDB | Banco de series temporais — dados com timestamp |
+| N | Node-RED | Orquestrador low-code — transforma e roteia |
+| G | Grafana | Dashboard — metricas, alertas, thresholds (tipo Power BI) |
+
+**Mosquitto:** porta 1883 (sem TLS) ou 8883 (com TLS)
+
+**InfluxDB:** 500 sensores x 1 leitura/s x 1 ano = 15 bilhoes de registros
+- Bucket: onde os dados ficam | Measurement: tabela | Field: valor | Tag: metadado indexado
+- Back-end Java se conecta diretamente com InfluxDB
+
+**Node-RED:** low-code, drag and drop, Node.js. Fluxo: [MQTT In] -> [Function] -> [InfluxDB Out]
+
+**Grafana:** thresholds, alertas e-mail/Slack, graficos em tempo real
+
+---
+
+## 10. Stack Web Enterprise
+
+Grafana e ferramenta tecnica. Para usuario final precisa de camada a mais.
+
+| Servico | Porta | Funcao |
+|---|---|---|
+| Mosquitto | 1883 | Broker MQTT |
+| Node-RED | 8082 | Orquestracao |
+| InfluxDB | 8083 | Series temporais |
+| Grafana | 8084 | Dashboard tecnico |
+| Backend | 8080 | API REST Node.js |
+| MySQL | 3306 | Banco relacional |
+| Frontend | 80 | Interface React |
+
+- USE_MOCK=true: simula dados sem hardware fisico
+- Servicos se comunicam por hostname interno Docker (nao localhost)
+
+---
+
+
+---
+
+## 12. COLA RAPIDA
+
+| Conceito | Palavra-chave |
+|---|---|
+| MQTT | Pub/Sub, broker, leve, QoS 0/1/2 |
+| DDS | Peer-to-peer, sem broker, tempo real critico |
+| AMQP | Filas, exchanges, garantia de entrega, ERP |
+| XMPP | XML, presenca, estado do dispositivo |
+| OPC UA | Semantica rica, CLP, SCADA, seguranca nativa |
+| Modbus | Legado 1979, mestre-escravo, RS-485 |
+| LoRaWAN | >10km, baixo consumo, CSS, classes A/B/C |
+| SigFox | Ultra-narrowband, unidirecional, ISM sub-GHz |
+| NB-IoT | Celular, pequenos volumes |
+| LTE-M | Celular, altos volumes |
+| 5G URLLC | 1.2ms, substitui cabo, robotica e AGVs |
+| TSN | Ethernet com garantias de tempo, une TI+OT |
+| Edge | Borda, latencia minima, resiliencia |
+| Cloud | Historico, IA, estrategico |
+| Mosquitto | Broker MQTT do stack MING, NAO processa |
+| InfluxDB | Series temporais, timestamp, Bucket/Measurement |
+| Node-RED | Low-code, fluxos, orquestracao |
+| Grafana | Dashboard, alertas, thresholds |
+| Gemeo Digital | Replica virtual, simulacao sem risco fisico |
+| Manut. Preditiva | Prever falha antes de ocorrer |
+| OEE | Disponibilidade x Performance x Qualidade |
+| Root of Trust | Chip criptografico isolado, Secure Boot |
+| TMR | Redundancia tripla, 2 de 3 sensores |
+| Retrofit | Modernizar legado com sensores externos |
+| Energy Harvesting | Energia do ambiente (vibracao/solar/calor) |
+| RAMI 4.0 | Modelo referencia Industria 4.0 |
+| TI vs OT | Confidencialidade vs Disponibilidade |
+| IEC-62443 | Norma seguranca automacao industrial |
+| IDMZ | Zona desmilitarizada entre internet e rede OT |
+| Air-gap | Isolamento fisico nao e suficiente sozinho |
+| Cooja | Simulador Contiki OS |
+| NS-3 | Simulador matematico, grande escala |
+| TOSSIM | Simulador TinyOS |
+| Wokwi | Arduino/ESP32 no browser |
