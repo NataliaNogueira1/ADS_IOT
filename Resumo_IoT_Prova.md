@@ -28,67 +28,6 @@
 
 ---
 
-## 7. Conectividade e Redes
-
-### Escolhendo a tecnologia certa
-
-Pergunta central: qual o trade-off entre alcance, consumo e velocidade que minha aplicacao tolera?
-
-| Tecnologia | Alcance | Consumo | Taxa de dados | Caso de uso |
-|---|---|---|---|---|
-| Wi-Fi | ~100m | Alto | Ate 600 Mbps | Cameras, monitoramento intenso |
-| BLE | ~50m | Muito baixo | Medio | Wearables, beacons |
-| Zigbee | ~300m (mesh) | Baixo | 250 kbps | Redes de sensores em predios |
-| LoRaWAN | >10 km | Muito baixo | ~50 kbps | Sensores rurais, medidores remotos |
-| SigFox | >10 km | Muito baixo | 100 bps | Telemetria simples, medidores |
-| NB-IoT | Cobertura 4G | Medio | ~50 kbps | Ativos urbanos com QoS garantido |
-| LTE-M | Cobertura 4G | Medio | Altos volumes | Rastreamento, volumes maiores |
-| 5G URLLC | Amplo | Variavel | Gbps, 1.2ms | Robotica, AGVs, cirurgia remota |
-| EtherCAT | Local (cabo) | — | <0.5ms latencia | Controle de robos, malha fechada |
-
-### LoRaWAN na pratica
-
-- Usa **Chirp Spread Spectrum (CSS):** alterna entre frequencias para ir para a menos trafegada
-- Pro: longa distancia. Contra: nao aguenta quase nada de peso, so dispositivo IoT mesmo
-
-Classes LoRaWAN:
-
-| Classe | Caracteristica | Prioridade |
-|---|---|---|
-| **A** | Protocolo ALOHA, hibernacao profunda | Bateria em 1o lugar |
-| **B** | Comunicacao sincronizada, janelas programadas | Intermediario |
-| **C** | Escuta continua, sem latencia | Exige fonte de energia externa |
-
-> Exemplo: produtor rural instala sensores de umidade em 50 pontos em 500 hectares. Um gateway cobre tudo, baterias duram mais de 10 anos.
-
-### SigFox
-- LPWAN ultra-narrowband, longo alcance (>10km), baixo consumo
-- Principalmente unidirecional (0G)
-- Usa ISM sub-GHz
-- Ideal para telemetria simples
-
-### NB-IoT e LTE-M
-- **NB-IoT (LTE Cat-NB):** pequenos volumes de dados, cobertura celular
-- **LTE-M:** altos volumes de dados, cobertura celular
-
-### 5G e URLLC
-
-O 5G tem tres modos:
-- **eMBB** (Enhanced Mobile Broadband): velocidade alta para streaming, AR/VR
-- **mMTC** (Massive Machine Type Communications): suporta milhoes de sensores por km2
-- **URLLC** (Ultra-Reliable Low Latency): latencia de **1.2ms** com altissima confiabilidade
-
-> URLLC permite substituir cabos em robotica industrial. Com 5G URLLC, robos moveis sem fio com confiabilidade de cabo.
-
-### TSN — Time-Sensitive Networking
-- Extensao do Ethernet padrao (IEEE 802.1) que adiciona garantias de tempo
-- Trafego critico tem faixa exclusiva garantida
-- Video de camera e controle de robo coexistem na mesma rede sem interferencia
-- Indispensavel em **controle de malha fechada** (ex: robo que precisa de resposta em <1ms)
-- Une TI e OT na mesma rede
-
----
-
 ## 2. IIoT — IoT na Industria
 
 | | IoT (consumidor) | IIoT (industrial) |
@@ -183,3 +122,66 @@ Hardware IIoT precisa:
 - Entrega contexto semantico (nao so o valor, mas unidade, limite, status)
 - Seguranca nativa: criptografia + certificados X.509
 - Comunicacao entre CLP e SCADA na rede local
+
+---
+
+## 7. Conectividade e Redes
+
+### Escolhendo a tecnologia certa
+
+Pergunta central: qual o trade-off entre alcance, consumo e velocidade que minha aplicacao tolera?
+
+| Tecnologia | Alcance | Consumo | Taxa de dados | Caso de uso |
+|---|---|---|---|---|
+| Wi-Fi | ~100m | Alto | Ate 600 Mbps | Cameras, monitoramento intenso |
+| BLE | ~50m | Muito baixo | Medio | Wearables, beacons |
+| Zigbee | ~300m (mesh) | Baixo | 250 kbps | Redes de sensores em predios |
+| LoRaWAN | >10 km | Muito baixo | ~50 kbps | Sensores rurais, medidores remotos |
+| SigFox | >10 km | Muito baixo | 100 bps | Telemetria simples, medidores |
+| NB-IoT | Cobertura 4G | Medio | ~50 kbps | Ativos urbanos com QoS garantido |
+| LTE-M | Cobertura 4G | Medio | Altos volumes | Rastreamento, volumes maiores |
+| 5G URLLC | Amplo | Variavel | Gbps, 1.2ms | Robotica, AGVs, cirurgia remota |
+| EtherCAT | Local (cabo) | — | <0.5ms latencia | Controle de robos, malha fechada |
+
+### LoRaWAN na pratica
+
+- Usa **Chirp Spread Spectrum (CSS):** alterna entre frequencias para ir para a menos trafegada
+- Pro: longa distancia. Contra: nao aguenta quase nada de peso, so dispositivo IoT mesmo
+
+Classes LoRaWAN:
+
+| Classe | Caracteristica | Prioridade |
+|---|---|---|
+| **A** | Protocolo ALOHA, hibernacao profunda | Bateria em 1o lugar |
+| **B** | Comunicacao sincronizada, janelas programadas | Intermediario |
+| **C** | Escuta continua, sem latencia | Exige fonte de energia externa |
+
+> Exemplo: produtor rural instala sensores de umidade em 50 pontos em 500 hectares. Um gateway cobre tudo, baterias duram mais de 10 anos.
+
+### SigFox
+- LPWAN ultra-narrowband, longo alcance (>10km), baixo consumo
+- Principalmente unidirecional (0G)
+- Usa ISM sub-GHz
+- Ideal para telemetria simples
+
+### NB-IoT e LTE-M
+- **NB-IoT (LTE Cat-NB):** pequenos volumes de dados, cobertura celular
+- **LTE-M:** altos volumes de dados, cobertura celular
+
+### 5G e URLLC
+
+O 5G tem tres modos:
+- **eMBB** (Enhanced Mobile Broadband): velocidade alta para streaming, AR/VR
+- **mMTC** (Massive Machine Type Communications): suporta milhoes de sensores por km2
+- **URLLC** (Ultra-Reliable Low Latency): latencia de **1.2ms** com altissima confiabilidade
+
+> URLLC permite substituir cabos em robotica industrial. Com 5G URLLC, robos moveis sem fio com confiabilidade de cabo.
+
+### TSN — Time-Sensitive Networking
+- Extensao do Ethernet padrao (IEEE 802.1) que adiciona garantias de tempo
+- Trafego critico tem faixa exclusiva garantida
+- Video de camera e controle de robo coexistem na mesma rede sem interferencia
+- Indispensavel em **controle de malha fechada** (ex: robo que precisa de resposta em <1ms)
+- Une TI e OT na mesma rede
+
+---
