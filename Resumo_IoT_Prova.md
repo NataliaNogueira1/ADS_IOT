@@ -22,6 +22,29 @@ Exemplo Fazenda Inteligente:
 - Conectividade: LoRaWAN transmite a 10km sem fio
 - Inteligencia: algoritmo na nuvem decide acionar irrigacao
 
+
+---
+
+## 1.1 Arquitetura em Camadas IoT (classico)
+
+| Camada | Nome | O que faz | Exemplo |
+|---|---|---|---|
+| 1 | **Perception** | Coleta dados do mundo fisico | Sensores, atuadores, RFID |
+| 2 | **Network** | Transmite os dados coletados | Wi-Fi, LoRaWAN, 5G, MQTT |
+| 3 | **Processing** | Processa e armazena os dados | Edge, Fog, Cloud, IA |
+| 4 | **Application** | Entrega valor ao usuario final | Dashboard, alertas, automacao |
+
+### Conceitos criticos para prova
+
+**Missao Critica:** sistema onde falha = consequencia grave e irreversivel (morte, explosao, parada de producao). Exige redundancia, testes rigorosos e certificacoes.
+
+**Alta Disponibilidade (HA):** capacidade do sistema de operar continuamente sem interrupcao. Medida em "noves":
+- 99,9% = 8,7h de downtime/ano
+- 99,99% = 52min de downtime/ano
+- 99,999% = 5min de downtime/ano (five nines - padrao industrial critico)
+
+> IIoT exige HA porque parada nao planejada = prejuizo financeiro + risco de seguranca.
+
 ---
 
 ## 2. IIoT - IoT na Industria
@@ -76,6 +99,21 @@ Hardware IIoT precisa:
 | Termico/IR | Temperatura | Paineis eletricos, motores |
 | Acustico/Ultrassonico | Sons acima de 20kHz | Vazamentos de ar comprimido |
 | Pressao/Fluido | Pressao diferencial | Bombas hidraulicas, tubulacoes |
+
+
+### Calibracao, Ruido e Drift
+
+**Calibracao:** processo de ajustar o sensor para que sua leitura corresponda ao valor real. Feita comparando com padrao de referencia.
+
+**Ruido / Interferencia:** variacao aleatoria no sinal que nao representa o fenomeno real.
+- Causa: interferencia eletromagnetica, vibracao mecanica, temperatura
+- Solucao: filtros digitais (media movel, filtro de Kalman)
+
+**Drift:** perda gradual de precisao do sensor ao longo do tempo.
+- Causa: envelhecimento do material, variacao de temperatura, desgaste
+- Solucao: recalibracao periodica ou sensor com compensacao automatica
+
+> Exemplo: sensor de temperatura que lia 25C correto no inicio, mas apos 2 anos le 26.5C sem nada ter mudado = drift de 1.5C.
 
 ### Root of Trust
 - Chip criptografico dedicado (ex: ATECC608A) isolado do processador
@@ -150,6 +188,19 @@ HTTP vs MQTT: HTTP e sincrono (precisa de resposta para continuar) - dispositivo
 - **Retain:** broker guarda ultima mensagem para novos subscribers
 - **Will:** mensagem enviada automaticamente se cliente desconectar
 
+
+### Telemetria vs Comando
+
+| | Telemetria | Comando |
+|---|---|---|
+| Direcao | Dispositivo -> Nuvem | Nuvem -> Dispositivo |
+| O que e | Dado coletado pelo sensor | Instrucao de atuacao |
+| Protocolo tipico | MQTT (pub/sub, leve) | XMPP (presenca + direto) |
+| Exemplo | temperatura: 72.4C | abrir_valvula: true |
+| QoS tipico | QoS 0 ou 1 | QoS 2 (exatamente 1x) |
+
+> Regra geral: MQTT para telemetria (muitos dados, direcao unica). XMPP para comando (precisa saber se dispositivo esta online antes de enviar).
+
 ### Comparativo Geral
 | Protocolo | Broker? | Latencia | Melhor para |
 |---|---|---|---|
@@ -180,6 +231,19 @@ HTTP vs MQTT: HTTP e sincrono (precisa de resposta para continuar) - dispositivo
 | LTE-M | Cobertura 4G | Medio | Altos volumes | Rastreamento |
 | 5G URLLC | Amplo | Variavel | Gbps, 1.2ms | Robotica, AGVs |
 | EtherCAT | Local (cabo) | - | <0.5ms | Controle de robos, malha fechada |
+
+
+### Topologias de Rede
+
+| Topologia | Como funciona | Protocolo tipico | Vantagem |
+|---|---|---|---|
+| **Star (Estrela)** | Todos os nos se conectam a um ponto central (broker/gateway) | MQTT, LoRaWAN | Simples, facil de gerenciar |
+| **Mesh (Malha)** | Cada no pode retransmitir dados de outros nos | Zigbee, Z-Wave | Alcance estendido, redundancia |
+| **Peer-to-Peer** | Nos se comunicam diretamente entre si, sem intermediario | DDS | Latencia minima, sem ponto unico de falha |
+
+> Exemplo Star: sensores MQTT publicam para o Mosquitto (centro). Se o broker cair, todos param.
+> Exemplo Mesh: sensor Zigbee longe do gateway usa outros sensores como "ponte" para chegar la.
+> Exemplo P2P: robos DDS trocam dados diretamente sem passar por servidor central.
 
 ### LoRaWAN
 - Usa **CSS (Chirp Spread Spectrum):** alterna frequencias para evitar conflitos
@@ -250,6 +314,35 @@ MING = Mosquitto + InfluxDB + Node-RED + Grafana
 
 **Grafana:** thresholds, alertas e-mail/Slack, graficos em tempo real
 
+
+### Plataformas IoT Cloud
+
+Plataformas gerenciam dispositivos, seguranca e integracao cloud em escala.
+
+| Plataforma | Fornecedor | Diferencial |
+|---|---|---|
+| **AWS IoT Core** | Amazon | Integracao com ecossistema AWS (Lambda, S3, ML) |
+| **Azure IoT Hub** | Microsoft | Integracao com Azure, forte em enterprise |
+| **Google Cloud IoT** | Google | Foco em IA/ML com BigQuery e TensorFlow |
+| **Stack MING** | Open Source | Controle total, sem vendor lock-in, ideal para lab |
+
+### Device Management (Gerenciamento de Dispositivos)
+
+Ponto importante que costuma cair em prova:
+
+| Conceito | O que e |
+|---|---|
+| **Provisionamento** | Processo de registrar e configurar um dispositivo novo na plataforma |
+| **Registro** | Catalogo de todos os dispositivos: ID, tipo, status, localizacao |
+| **Identidade unica** | Cada dispositivo tem certificado/chave propria (nao compartilhada) |
+| **OTA (Over-the-Air)** | Atualizacao remota de firmware sem acesso fisico ao dispositivo |
+
+**OTA - Riscos e Seguranca:**
+- Risco: firmware corrompido pode inutilizar o dispositivo (brick)
+- Risco: atualizacao interceptada pode instalar codigo malicioso
+- Protecao: assinatura digital do firmware + verificacao de hash antes de aplicar
+- Protecao: rollback automatico se nova versao falhar
+
 ---
 
 ## 10. Stack Web Enterprise
@@ -306,9 +399,58 @@ Grafana e ferramenta tecnica. Para usuario final precisa de camada a mais.
 
 **Air-gap e mito:** Stuxnet (2010) destruiu centrifugas no Ira via pen drive em rede isolada. Vetores: pen drive, laptop de manutencao, gateway mal configurado.
 
+
 ---
 
-## 12. COLA RAPIDA
+## 12. CONCEITOS TEORICOS PARA PROVA
+
+### Tipos de Dados IoT
+
+| Tipo | O que e | Exemplo | Onde armazenar |
+|---|---|---|---|
+| **Time-series** | Valor + timestamp, sequencia continua | temperatura a cada 1s | InfluxDB |
+| **Eventos** | Ocorrencia pontual e discreta | alarme disparado, porta aberta | Fila AMQP / log |
+| **Estado** | Condicao atual do dispositivo | valvula: aberta/fechada | Banco relacional / cache |
+
+### Latency vs Throughput
+
+| | Latencia | Throughput |
+|---|---|---|
+| O que mede | Tempo de uma mensagem chegar ao destino | Quantidade de dados transmitidos por segundo |
+| Unidade | ms (milissegundos) | Mbps, mensagens/s |
+| Quando importa | Controle em tempo real, comandos | Streaming de video, Big Data |
+| Exemplo ruim | Robo recebe comando com 200ms de atraso | Sensor envia 1 leitura/hora quando precisava de 1000/s |
+
+> Regra: sistemas de controle priorizam latencia. Sistemas de monitoramento priorizam throughput.
+
+### Hard Real-Time vs Soft Real-Time
+
+| | Hard Real-Time | Soft Real-Time |
+|---|---|---|
+| Definicao | Prazo NUNCA pode ser violado | Prazo pode ser violado ocasionalmente |
+| Consequencia de falha | Catastrofica (falha do sistema, risco de vida) | Degradacao de qualidade (aceitavel) |
+| Exemplo | Airbag de carro, freio ABS, robo cirurgico | Streaming de video, dashboard IoT |
+| Protocolo tipico | DDS, TSN, EtherCAT | MQTT, HTTP |
+| Latencia tipica | < 1ms | < 100ms |
+
+> Regra de prova: IIoT de controle = Hard Real-Time. IIoT de monitoramento = Soft Real-Time.
+
+### Resumo de Pegadinhas
+
+| Pergunta | Resposta |
+|---|---|
+| MQTT processa dados? | NAO - so roteia. Node-RED processa. |
+| Broker e obrigatorio no DDS? | NAO - peer-to-peer sem broker |
+| LoRaWAN aguenta alto volume? | NAO - baixa taxa, so IoT simples |
+| Air-gap garante seguranca total? | NAO - Stuxnet provou que nao |
+| Edge substitui Cloud? | NAO - sao complementares |
+| QoS 2 e sempre melhor? | NAO - mais lento, usar so quando necessario |
+| Grafana armazena dados? | NAO - so visualiza. InfluxDB armazena. |
+| OTA e sempre seguro? | NAO - precisa assinatura digital + rollback |
+
+---
+
+## 13. COLA RAPIDA
 
 | Conceito | Palavra-chave |
 |---|---|
@@ -349,3 +491,92 @@ Grafana e ferramenta tecnica. Para usuario final precisa de camada a mais.
 | Wokwi | Arduino/ESP32 no browser |
 
 
+
+
+
+
+
+
+
+
+---
+
+## 14. COMPLEMENTOS FINAIS
+
+### IPv6 e Endereçamento de Dispositivos
+
+**Problema:** IPv4 tem ~4 bilhoes de enderecos. IoT tem bilhoes de dispositivos. Nao escala.
+
+**Solucao:** IPv6
+- Espaco de enderecos: 2^128 = 340 undecilhoes de enderecos
+- Cada dispositivo IoT pode ter IP unico e global
+- Sem necessidade de NAT
+- Suporte nativo a multicast (util para redes de sensores)
+
+> Pergunta classica: "Como bilhoes de dispositivos IoT sao identificados na internet?"
+> Resposta: IPv4 nao escala. IPv6 resolve com espaco quase infinito de enderecos unicos.
+
+---
+
+### Gestao de Energia — Sleep e Duty Cycle
+
+**Deep Sleep:** dispositivo desliga quase tudo (CPU, radio) e acorda apenas pelo timer ou interrupcao externa. Consumo cai de mA para uA.
+
+**Duty Cycle:** percentual do tempo que o dispositivo fica ativo.
+- Duty cycle 1% = ativo 1% do tempo, dormindo 99%
+- LoRaWAN Classe A usa duty cycle baixissimo
+
+**Ciclo tipico de sensor IoT com bateria:**
+`
+[Acorda] -> [Le sensor] -> [Envia MQTT] -> [Dorme por 60s] -> [Acorda] -> ...
+   2ms          5ms           10ms            60.000ms
+`
+> Resultado: bateria que duraria 1 semana ligado continuamente dura mais de 10 anos com deep sleep.
+
+---
+
+### Interoperabilidade
+
+**Problema:** dispositivos de fabricantes diferentes, com protocolos diferentes, nao se comunicam nativamente.
+
+| Camada | Problema | Solucao |
+|---|---|---|
+| Protocolo | MQTT vs OPC UA vs Modbus | Gateway que converte protocolos |
+| Semantica | "temp" vs "temperature" vs "T1" | OPC UA (semantica padronizada) |
+| Seguranca | Certificados incompativeis | Padroes abertos (X.509, TLS) |
+
+**Solucoes de interoperabilidade:**
+- **Padroes abertos:** MQTT, OPC UA, HTTP — qualquer fabricante implementa
+- **Gateway de protocolo:** converte Modbus -> MQTT, OPC UA -> REST etc.
+- **Node-RED:** orquestra multiplos protocolos num unico fluxo
+
+> Exemplo: CLP Siemens (OPC UA) + sensor chines (Modbus) + dashboard (MQTT). O gateway converte tudo para MQTT. O Node-RED integra. O Grafana exibe.
+
+---
+
+### IA no Edge vs Cloud
+
+| | Edge (Inferencia) | Cloud (Treinamento) |
+|---|---|---|
+| O que faz | Aplica o modelo ja treinado | Treina o modelo com historico |
+| Quando roda | Tempo real, milissegundos | Horas/dias, offline |
+| Dados necessarios | Poucos (leitura atual) | Muitos (meses de historico) |
+| Hardware | Microcontrolador, FPGA, GPU embarcada | Servidores com GPU/TPU |
+| Exemplo | Detectar anomalia de vibracao agora | Aprender padrao de falha com 1 ano de dados |
+
+> Fluxo completo: Cloud treina modelo -> exporta modelo compacto (TensorFlow Lite, ONNX) -> Edge executa inferencia em tempo real sem internet.
+
+---
+
+### Detalhes Tecnicos (pegadinhas)
+
+| Detalhe | Resposta |
+|---|---|
+| MQTT roda sobre qual protocolo? | **TCP/IP** (garante entrega ordenada e confiavel) |
+| DDS roda sobre qual protocolo? | UDP (prioriza velocidade, sem overhead de conexao) |
+| Por que MQTT usa TCP e nao UDP? | QoS 1 e 2 precisam de confirmacao de entrega — TCP garante isso |
+| LoRaWAN usa IP? | Nao — protocolo proprio, nao e IP-based |
+| OPC UA pode usar qual transporte? | TCP binario ou HTTPS |
+| Porta padrao MQTT sem TLS? | 1883 |
+| Porta padrao MQTT com TLS? | 8883 |
+| Porta padrao InfluxDB? | 8086 |
